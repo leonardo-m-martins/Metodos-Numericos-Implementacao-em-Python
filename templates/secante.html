@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parâmetros Secante</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="button">Voltar</a>
+        <h1>Método da Secante</h1>
+        
+        <form method="POST">
+            <label for="funcao">Função f(x):</label>
+            <input type="text" id="funcao" name="funcao" value="{{ request.form['funcao'] if request.method == 'POST' else '' }}" required>
+            {% if avaliacaoFuncao is not none %}
+                <erro>{{ avaliacaoFuncao }}</erro>
+            {% endif %}
+
+            <informacoes>
+                <div class="texto" id="caixaTexto">
+                <p>
+                    Os valores devem ser números reais. Letras além de x não são aceitas para a função.
+                </p>
+                <pre class="texto-escondido">
+Funções suportadas: 
+Seno de x: sin(x)
+Logaritmo neperiano de x: log(x) 
+Coseno de x: cos(x) 
+Logaritmo na base 10 de x: log10(x) 
+Tangente de x: tan(x)
+Modulo de x: abs(x)
+Arco Seno de x: arcsin(x) 
+Arco Tangente de x: arctan(x) 
+Raiz Quadrada: sqrt(x)
+Exponencial de x: exp(x) 
+Fatorial de x: factorial(x)
+Operadores: 
++ (soma); 
+- (subtração); 
+* (multiplicação); 
+/ (divisão); 
+** (potenciação); 
+Constante: pi (3.14159...), e (2.71828...)
+Outras Funções: sinh, cosh, tanh, arcsinh, arccosh, arctanh, power, float_power, min, max, trunc, 
+                round, arccos, rad2deg, deg2rad, random
+                </pre>
+            </div>
+            <span class="expandir-btn" id="botaoExpandir">Mais detalhes</span>
+        
+            <script>
+                document.getElementById("botaoExpandir").onclick = function () {
+                    const caixaTexto = document.getElementById("caixaTexto");
+                    const botao = document.getElementById("botaoExpandir");
+                    
+                    if (caixaTexto.classList.toggle("expanso")) {
+                        botao.textContent = "Menos detalhes";
+                    } else {
+                        botao.textContent = "Mais detalhes";
+                    }
+                };
+            </script>
+            </informacoes>
+        
+            <script>
+                document.getElementById("botaoExpandir").onclick = function () {
+                    const caixaTexto = document.getElementById("caixaTexto");
+                    const botao = document.getElementById("botaoExpandir");
+                    
+                    if (caixaTexto.classList.toggle("expanso")) {
+                        botao.textContent = "Menos detalhes";
+                    } else {
+                        botao.textContent = "Mais detalhes";
+                    }
+                };
+            </script>
+
+            <label for="TOL">Tolerância (TOL):</label>
+            <input type="text" id="TOL" name="TOL" value="{{ request.form['TOL'] if request.method == 'POST' and request.form['TOL'] else '' }}" placeholder="Valor padrão: 0.0001">
+            {% if avaliarFloatTOL is not none %}
+                <erro>{{ avaliarFloatTOL }}</erro>
+            {% endif %}
+
+            <label for="x0">Valor de x<sub>0</sub>:</label>
+            <input type="text" id="x0" name="x0" value="{{ request.form['x0'] if request.method == 'POST' else '' }}" required>
+            {% if avaliarFloatX0 is not none %}
+                <erro>{{ avaliarFloatX0 }}</erro>
+            {% endif %}
+
+            <label for="x1">Valor de x<sub>1</sub>:</label>
+            <input type="text" id="x1" name="x1" value="{{ request.form['x1'] if request.method == 'POST' else '' }}" required>
+            {% if avaliarFloatX1 is not none %}
+                <erro>{{ avaliarFloatX1 }}</erro>
+            {% endif %}
+            
+            <button type="submit">Calcular</button>
+        </form>
+        
+        <br>
+        {% if erroMetodo is not none %}
+            <erro>{{ erroMetodo }}</erro>
+        {% endif %}
+        {% if x is not none %}
+        <h3>Resultado:</h3>
+        <p>X<sub>{{ Xs|length }}</sub>: {{ x }}</p>
+        <p>Erro absoluto: {{ erroAbsoluto }}</p>
+        <table>
+            <thead>
+                <th>X<sub>n</sub></th>
+            </thead>
+            {% for xn,fxn in Xs %}
+            {% if loop.index != 1 %}
+            <tbody>
+                <tr>
+                    <td>X<sub>{{ loop.index }}</sub> = <span class="fraction"><span class="numerator">({{ Xs[loop.index - 2][0] }} * {{ fxn }}) - ({{ xn }} * {{ Xs[loop.index - 2][1] }})</span><span>({{ fxn }}) - ({{ Xs[loop.index - 2][1] }})</span></span> </td>
+                </tr>
+            </tbody>
+            {% endif %}
+            {% endfor %}
+        </table>
+        {% endif %}
+    </div>
+</body>
+</html>

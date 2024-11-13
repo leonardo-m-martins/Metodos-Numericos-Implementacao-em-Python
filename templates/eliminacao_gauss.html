@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parâmetros Eliminação de Gauss</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="button">Voltar</a>
+        <h1>Eliminação de Gauss</h1>
+        
+        <form id="formulario" method="POST">
+            <label class="ordem" for="ordem">Selecione a ordem:</label>
+            <select class="ordem" id="ordem" name="ordem" onchange="gerarTabela()">
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+            </select>
+    
+            <div id="tabelaEG-container">
+                <!-- Tabela será gerada aqui -->
+            </div>
+
+            <informacoes>
+                <div class="texto" id="caixaTexto">
+                <p>
+                    Os valores devem ser números reais.
+                </p>
+                <pre class="texto-escondido">
+Operadores: 
++ (soma); 
+- (subtração); 
+* (multiplicação); 
+/ (divisão); 
+** (potenciação); 
+                </pre>
+            </div>
+            <span class="expandir-btn" id="botaoExpandir">Mais detalhes</span>
+        
+            <script>
+                document.getElementById("botaoExpandir").onclick = function () {
+                    const caixaTexto = document.getElementById("caixaTexto");
+                    const botao = document.getElementById("botaoExpandir");
+                    
+                    if (caixaTexto.classList.toggle("expanso")) {
+                        botao.textContent = "Menos detalhes";
+                    } else {
+                        botao.textContent = "Mais detalhes";
+                    }
+                };
+            </script>
+            </informacoes>
+    
+            <button type="submit">Calcular</button>
+        </form>
+    
+        <script>
+            // Função para gerar a tabelaEG com base na ordem selecionada
+            function gerarTabela() {
+                var ordem = document.getElementById('ordem').value; // Pega o valor da ordem
+                var tabelaEG = '<table class="gauss" border="1">';
+                var tabelaEGBody = ''
+                var tabelaEGHead = '<thead class="gauss">'
+    
+                // Gera as linhas da tabelaEG
+                for (var i = 0; i < ordem; i++) {
+                    tabelaEGBody += '<tr>';
+                    for (var j = 0; j <= ordem; j++) {
+                        if (i == 0){
+                            if (j != ordem) {tabelaEGHead += '<th class="gauss">X<sub>' + (j + 1) + '</sub></th>'}
+                            else {tabelaEGHead += '<th class="gauss">=</th>'}
+                        }
+                        if (j != ordem) {
+                            tabelaEGBody += '<td><input class="gauss" type="text" name="tabelaEG-' + i + '-' + j + '" value="">X<sub>' + (j + 1) + '</sub></td>';
+                        } else {
+                            tabelaEGBody += '<td><input class="gauss" type="text" name="tabelaEG-' + i + '-' + j + '" value=""></td>';
+                        }
+                    }
+                    tabelaEGHead += '</thead>'
+                    tabelaEGBody += '</tr>';
+                }
+                tabelaEG += tabelaEGHead+tabelaEGBody+'</table>';
+    
+                // Insere a tabelaEG no container
+                document.getElementById('tabelaEG-container').innerHTML = tabelaEG;
+            }
+    
+            // Gera a tabelaEG ao carregar a página com a ordem padrão
+            window.onload = function() {
+                gerarTabela(); // Gera a tabelaEG com a ordem inicial, que é 3 por padrão
+            };
+        </script>
+    
+        <script>
+            // Função para restaurar os valores ao carregar a página (se houver valores salvos no localStorage)
+            window.onload = function() {
+                gerarTabela(); // Gera a tabelaEG com a ordem inicial, que é 3 por padrão
+                var valoresSalvos = localStorage.getItem('tabelaEG');
+                if (valoresSalvos) {
+                    valoresSalvos = JSON.parse(valoresSalvos);
+                    var tabelaEGInputs = document.querySelectorAll('input[type="text"]');
+                    for (var i = 0; i < tabelaEGInputs.length; i++) {
+                        if (valoresSalvos[i].toString() != 'undefined'){tabelaEGInputs[i].value = valoresSalvos[i];}
+                    }
+                }
+            }
+    
+            // Função para salvar os dados da tabelaEG quando o formulário for enviado
+            document.getElementById("formulario").onsubmit = function(event) {
+                event.preventDefault(); // Impede o envio do formulário
+    
+                var tabelaEG = document.querySelectorAll('input[type="text"]');
+                var valores = [];
+    
+                // Salva os valores dos inputs em um array
+                tabelaEG.forEach(function(input) {
+                    valores.push(input.value);
+                });
+    
+                // Armazena os valores no localStorage
+                localStorage.setItem('tabelaEG', JSON.stringify(valores));
+                document.getElementById("formulario").submit();
+            }
+        </script>
+        
+        <br>
+        {% if erroMetodo is not none %}
+            <erro>{{ erroMetodo }}</erro>
+        {% endif %}
+        {% if erroValores is not none %}
+            <erro>{{ erroValores }}</erro>
+        {% endif %}
+        {% if Xs is not none %}
+        <h3>Resultado:</h3>
+        {% for xn in Xs %}
+            <p>X<sub>{{ loop.index }}</sub> = {{ xn }}</p>
+        {% endfor %}
+        <h4>Passo a passo triângulo superior:</h4>
+        {% for matr in matrizes %}
+            <table class="gauss">
+                <thead>
+                    {% for xn in Xs %}
+                        <th class="gauss">{{ loop.index }}</th>
+                    {% endfor %}
+                    <th class="gauss">=</th>
+                </thead>
+                <tbody>
+                    {% for linha in matr %}
+                    <tr>
+                        {% for elem in linha %}
+                        <td>{{ elem }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+        {% endif %}
+    </div>
+</body>
+</html>

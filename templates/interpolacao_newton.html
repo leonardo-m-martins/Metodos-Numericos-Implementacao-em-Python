@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parâmetros Interpolação Newton</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="button">Voltar</a>
+        <h1>Método da Interpolação por Newton</h1>
+        
+        <form id="formulario" method="POST">
+            <label class="tipo" for="tipo">Tipo de Interpolação:</label>
+            <select name="tipo" id="tipo" required>
+                <option value="Normal">Normal</option>
+                <option value="Inversa">Inversa</option>
+            </select>
+
+            <label class="pontos" for="pontos">Número de pontos:</label>
+            <input type="number" id="pontos" name="pontos" value="{{ request.form['pontos'] if request.method == 'POST' and request.form['pontos'] else '5' }}" onchange="gerarTabela()" min="2">
+            <erro id="erroPontos"></erro>
+
+            <label class="x" for="x">Valor de x (f(x) para Inversa):</label>
+            <input type="text" id="x" name="x" value="{{ request.form['x'] if request.method == 'POST' and request.form['x'] else '' }}" required>
+            {% if avaliarFloatX is not none %}
+                <erro>{{ avaliarFloatX }}</erro>
+            {% endif %}
+    
+            <div class="tabela-pontos" id="tabela-pontos">
+                <!-- Tabela será gerada aqui -->
+            </div>
+
+            <informacoes>
+                <div class="texto" id="caixaTexto">
+                <p>
+                    Os valores devem ser números reais.
+                </p>
+                <pre class="texto-escondido">
+Operadores: 
++ (soma); 
+- (subtração); 
+* (multiplicação); 
+/ (divisão); 
+** (potenciação); 
+                </pre>
+            </div>
+            <span class="expandir-btn" id="botaoExpandir">Mais detalhes</span>
+        
+            <script>
+                document.getElementById("botaoExpandir").onclick = function () {
+                    const caixaTexto = document.getElementById("caixaTexto");
+                    const botao = document.getElementById("botaoExpandir");
+                    
+                    if (caixaTexto.classList.toggle("expanso")) {
+                        botao.textContent = "Menos detalhes";
+                    } else {
+                        botao.textContent = "Mais detalhes";
+                    }
+                };
+            </script>
+            </informacoes>
+    
+            <button type="submit">Calcular</button>
+        </form>
+    
+        <script>
+            function isInteger(input){
+                const num = Number(input);
+                return !isNaN(num) && Number.isInteger(num);
+            }
+            // Função para gerar a tabelaIN com base na ordem selecionada
+            function gerarTabela() {
+                var pontos = document.getElementById('pontos').value;
+                if (!isInteger(pontos) || Number(pontos) > 100){
+                    document.getElementById('erroPontos').innerHTML = 'Erro: valor de entrada inválido'
+                }
+                else {
+                    
+                    var tabelaIN = '<table class="pontos">';
+                    var tabelaINBody = '<tbody class="pontos"><tr class="pontos"><th>X</th>';
+                    var tabelaINHead = '<thead class="pontos"><th class="pontos">#</th>';
+                    
+        
+                    // Gera as linhas da tabelaIN
+                    for (var i = 0; i < pontos; i++) {
+                        tabelaINHead += '<th class="pontos">'+i+'</th>'
+                        tabelaINBody += '<td class="pontos"><input class="pontos" type="text" id="tabelaIN-x-'+i+'" name="tabelaIN-x-'+i+' required"></td>'
+                    }
+                    tabelaINBody += '</tr><tr class="pontos"><th class="pontos">f(X)</th>'
+                    for (var i = 0; i < pontos; i++) {
+                        tabelaINBody += '<td class="pontos"><input class="pontos" type="text" id="tabelaIN-fx-'+i+'" name="tabelaIN-fx-'+i+' required"></td>'
+                    }
+                    tabelaINHead += '</thead>'
+                    tabelaINBody += '</tr></tbody>'
+                    tabelaIN += tabelaINHead+tabelaINBody+'</table>'
+        
+                    // Insere a tabelaIN no container
+                    document.getElementById('tabela-pontos').innerHTML = tabelaIN;
+                }
+            }
+    
+            // Gera a tabelaIN ao carregar a página com os pontos padrão
+            window.onload = function() {
+                gerarTabela(); // Gera a tabelaIN com os pontos iniciais, que é 5 por padrão
+            };
+        </script>
+    
+        <script>
+            // Função para restaurar os valores ao carregar a página (se houver valores salvos no localStorage)
+            window.onload = function() {
+                gerarTabela(); // Gera a tabelaIN com os pontos iniciais, que é e por padrão
+
+                // Restaurar valores salvos no localStorage para tabelaIN
+                var valoresSalvos = localStorage.getItem('tabelaIN');
+                if (valoresSalvos) {
+                    valoresSalvos = JSON.parse(valoresSalvos);
+                    var tabelaINInputs = document.querySelectorAll('input[type="text"].pontos');
+                    for (var i = 0; i < tabelaINInputs.length; i++) {
+                        if (valoresSalvos[i].toString() != 'undefined'){tabelaINInputs[i].value = valoresSalvos[i];}
+                    }
+                }
+
+                // Restaura tipo
+                var tipo = localStorage.getItem('tipo');
+                var tipoSelect = document.getElementById('tipo');
+                if (tipo){
+                    tipoSelect.value = tipo;
+                }
+            }
+
+            // Função para salvar os valores das tabelaINs no localStorage ao enviar o formulário
+            document.getElementById("formulario").onsubmit = function(event) {
+                event.preventDefault(); // Impede o envio do formulário
+
+                // Salvar os valores da tabelaIN principal
+                var tabelaIN = document.querySelectorAll('input[name^="tabelaIN-"]');
+                var valores = [];
+                tabelaIN.forEach(function(input) {
+                    valores.push(input.value);
+                });
+                // Salvar o tipo
+                var tipo = document.getElementById('tipo').value;
+
+                localStorage.setItem('tabelaIN', JSON.stringify(valores));
+                localStorage.setItem('tipo',tipo);
+
+                document.getElementById("formulario").submit();
+            }
+        </script>
+        
+        <br>
+        {% if erroMetodo is not none %}
+            <erro>{{ erroMetodo }}</erro>
+        {% endif %}
+        {% if erroValores is not none %}
+            <erro>{{ erroValores }}</erro>
+        {% endif %}
+        {% if resul_x is not none %}
+        <h3>Resultado:</h3>
+        <p>f(x) (ou x para interpolação inversa): {{ resul_x }}</p>
+        <h4>Passo a passo:</h4>
+        <p>Polinômio de Lagrange: {{ Pn }}</p>
+
+        <table class="tabelaDiferencasDivididas">
+            {% if tipo == 'Normal' %}
+            <thead>
+                <th>X</th>
+                <th>f(X)</th>
+                {% for t in tabelaDiferencasDivididas %}
+                {% if loop.index != 1 %}
+                <th>f[{% for i in range(loop.index) %}X<sub>{{ i }} </sub>{% endfor %}]</th>
+                {% endif %}
+                {% endfor %}
+            </thead>
+            {% else %}
+            <thead>
+                <th>f(X)</th>
+                <th>X</th>
+                {% for t in tabelaDiferencasDivididas %}
+                {% if loop.index != 1 %}
+                <th>f[{% for i in range(loop.index) %}X<sub>n+{{ i }} </sub>{% endfor %}]</th>
+                {% endif %}
+                {% endfor %}
+            </thead>
+            {% endif %}
+            <tbody>
+                {% for chave,valor in tabelaDiferencasDivididas[0].items() %}
+                <tr>
+                    <td>{{ chave }}</td>
+                    <td>{{ valor }}</td>
+                    {% set i = loop.index %}
+                    {% for t in tabelaDiferencasDivididas %}
+                        {% if loop.index != 1 %}
+                            {% for elem in t %}
+                                {% if loop.index == i %}
+                                    <td>{{ elem }}</td>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+</body>
+</html>

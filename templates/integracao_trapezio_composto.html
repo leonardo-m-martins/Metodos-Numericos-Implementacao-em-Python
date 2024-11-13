@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parâmetros Integração por Trapézio Composto</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="button">Voltar</a>
+        <h1>Método da Integração por Trapézio Composto</h1>
+        
+        <form id="formulario" method="POST">
+
+            <label for="funcao">Função f(x):</label>
+            <input type="text" id="funcao" name="funcao" value="{{ request.form['funcao'] if request.method == 'POST' else '' }}" required>
+            {% if avaliacaoFuncao is not none %}
+                <erro>{{ avaliacaoFuncao }}</erro>
+            {% endif %}
+
+            <label class="pontos" for="pontos">Número de pontos:</label>
+            <input type="number" id="pontos" name="pontos" value="{{ request.form['pontos'] if request.method == 'POST' and request.form['pontos'] else '' }}" min="2" required>
+            {% if avaliarInt is not none %}
+                <erro>{{ avaliarInt }}</erro>
+            {% endif %}
+
+            <label for="limite_inferior">X inicial:</label>
+            <input type="text" id="limite_inferior" name="limite_inferior" value="{{ request.form['limite_inferior'] if request.method == 'POST' else '' }}" required>
+            {% if avaliarFloat is not none %}
+                <erro>{{ avaliarFloat }}</erro>
+            {% endif %}
+            
+            <label for="limite_superior">X final:</label>
+            <input type="text" id="limite_superior" name="limite_superior" value="{{ request.form['limite_superior'] if request.method == 'POST' else '' }}" required>
+            {% if avaliarFloat is not none %}
+                <erro>{{ avaliarFloat }}</erro>
+            {% endif %}
+
+            <informacoes>
+                <div class="texto" id="caixaTexto">
+                <p>
+                    Os valores devem ser números reais. Letras além de x não são aceitas para a função.
+                </p>
+                <pre class="texto-escondido">
+Funções suportadas: 
+Seno de x: sin(x)
+Logaritmo neperiano de x: log(x) 
+Coseno de x: cos(x) 
+Logaritmo na base 10 de x: log10(x) 
+Tangente de x: tan(x)
+Modulo de x: abs(x)
+Arco Seno de x: arcsin(x) 
+Arco Tangente de x: arctan(x) 
+Raiz Quadrada: sqrt(x)
+Exponencial de x: exp(x) 
+Fatorial de x: factorial(x)
+Operadores: 
++ (soma); 
+- (subtração); 
+* (multiplicação); 
+/ (divisão); 
+** (potenciação); 
+Constante: pi (3.14159...), e (2.71828...)
+Outras Funções: sinh, cosh, tanh, arcsinh, arccosh, arctanh, power, float_power, min, max, trunc, 
+                round, arccos, rad2deg, deg2rad, random
+                </pre>
+            </div>
+            <span class="expandir-btn" id="botaoExpandir">Mais detalhes</span>
+        
+            <script>
+                document.getElementById("botaoExpandir").onclick = function () {
+                    const caixaTexto = document.getElementById("caixaTexto");
+                    const botao = document.getElementById("botaoExpandir");
+                    
+                    if (caixaTexto.classList.toggle("expanso")) {
+                        botao.textContent = "Menos detalhes";
+                    } else {
+                        botao.textContent = "Mais detalhes";
+                    }
+                };
+            </script>
+            </informacoes>
+    
+            <button type="submit">Calcular</button>
+        </form>
+        
+        <br>
+        {% if erroMetodo is not none %}
+            <erro>{{ erroMetodo }}</erro>
+        {% endif %}
+        {% if erroValores is not none %}
+            <erro>{{ erroValores }}</erro>
+        {% endif %}
+        {% if integral is not none %}
+        <h3>Resultado:</h3>
+        <p>Valor da Integral: {{ integral }}</p>
+        <p>Passo(h): {{ h }}</p>
+        
+        <table class="pontos">
+            <thead class="pontos">
+                <th>x</th>
+                <th>f(x)</th>
+            </thead>
+            <tbody class="pontos">
+                {% for i in range(num_pontos) %}
+                <tr>
+                    <td>{{ Xs[i] }}</td>
+                    <td>{{ fXs[i] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+</body>
+</html>

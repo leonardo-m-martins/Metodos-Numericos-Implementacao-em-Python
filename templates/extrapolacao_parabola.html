@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parâmetros Extrapolação por Parábola</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="button">Voltar</a>
+        <h1>Método da Extrapolação por Parábola</h1>
+        
+        <form id="formulario" method="POST">
+
+            <label class="pontos" for="pontos">Número de pontos:</label>
+            <input type="number" id="pontos" name="pontos" value="{{ request.form['pontos'] if request.method == 'POST' and request.form['pontos'] else '5' }}" onchange="gerarTabela()" min="2">
+            <erro id="erroPontos"></erro>
+
+            <label class="x" for="x">Valor de x:</label>
+            <input type="text" id="x" name="x" value="{{ request.form['x'] if request.method == 'POST' and request.form['x'] else '' }}" required>
+            {% if avaliarFloatX is not none %}
+                <erro>{{ avaliarFloatX }}</erro>
+            {% endif %}
+    
+            <div class="tabelaExtr-pontos" id="tabelaExtr-pontos">
+                <!-- Tabela será gerada aqui -->
+            </div>
+
+            <informacoes>
+                <div class="texto" id="caixaTexto">
+                <p>
+                    Os valores devem ser números reais.
+                </p>
+                <pre class="texto-escondido">
+Operadores: 
++ (soma); 
+- (subtração); 
+* (multiplicação); 
+/ (divisão); 
+** (potenciação); 
+                </pre>
+            </div>
+            <span class="expandir-btn" id="botaoExpandir">Mais detalhes</span>
+        
+            <script>
+                document.getElementById("botaoExpandir").onclick = function () {
+                    const caixaTexto = document.getElementById("caixaTexto");
+                    const botao = document.getElementById("botaoExpandir");
+                    
+                    if (caixaTexto.classList.toggle("expanso")) {
+                        botao.textContent = "Menos detalhes";
+                    } else {
+                        botao.textContent = "Mais detalhes";
+                    }
+                };
+            </script>
+            </informacoes>
+    
+            <button type="submit">Calcular</button>
+        </form>
+    
+        <script>
+            function isInteger(input){
+                const num = Number(input);
+                return !isNaN(num) && Number.isInteger(num);
+            }
+            // Função para gerar a tabela com base na ordem selecionada
+            function gerarTabela() {
+                var pontos = document.getElementById('pontos').value;
+                if (!isInteger(pontos) || Number(pontos) > 100){
+                    document.getElementById('erroPontos').innerHTML = 'Erro: valor de entrada inválido'
+                }
+                else {
+                    
+                    var tabela = '<table class="pontos">';
+                    var tabelaBody = '<tbody class="pontos"><tr class="pontos"><th>X</th>';
+                    var tabelaHead = '<thead class="pontos"><th class="pontos">#</th>';
+                    
+        
+                    // Gera as linhas da tabela
+                    for (var i = 0; i < pontos; i++) {
+                        tabelaHead += '<th class="pontos">'+i+'</th>'
+                        tabelaBody += '<td class="pontos"><input class="pontos" type="text" id="tabelaExtr-x-'+i+'" name="tabelaExtr-x-'+i+' required"></td>'
+                    }
+                    tabelaBody += '</tr><tr class="pontos"><th class="pontos">f(X)</th>'
+                    for (var i = 0; i < pontos; i++) {
+                        tabelaBody += '<td class="pontos"><input class="pontos" type="text" id="tabelaExtr-fx-'+i+'" name="tabelaExtr-fx-'+i+' required"></td>'
+                    }
+                    tabelaHead += '</thead>'
+                    tabelaBody += '</tr></tbody>'
+                    tabela += tabelaHead+tabelaBody+'</table>'
+        
+                    // Insere a tabela no container
+                    document.getElementById('tabelaExtr-pontos').innerHTML = tabela;
+                }
+            }
+    
+            // Gera a tabela ao carregar a página com os pontos padrão
+            window.onload = function() {
+                gerarTabela(); // Gera a tabela com os pontos iniciais, que é 5 por padrão
+            };
+        </script>
+    
+        <script>
+            // Função para restaurar os valores ao carregar a página (se houver valores salvos no localStorage)
+            window.onload = function() {
+                gerarTabela(); // Gera a tabela com os pontos iniciais, que é e por padrão
+
+                // Restaurar valores salvos no localStorage para tabela
+                var valoresSalvos = localStorage.getItem('tabelaExtr');
+                if (valoresSalvos) {
+                    valoresSalvos = JSON.parse(valoresSalvos);
+                    var tabelaInputs = document.querySelectorAll('input[type="text"].pontos');
+                    for (var i = 0; i < tabelaInputs.length; i++) {
+                        if (valoresSalvos[i].toString() != 'undefined'){tabelaInputs[i].value = valoresSalvos[i];}
+                    }
+                }
+            }
+
+            // Função para salvar os valores das tabelas no localStorage ao enviar o formulário
+            document.getElementById("formulario").onsubmit = function(event) {
+                event.preventDefault(); // Impede o envio do formulário
+
+                // Salvar os valores da tabela principal
+                var tabela = document.querySelectorAll('input[name^="tabelaExtr-"]');
+                var valores = [];
+                tabela.forEach(function(input) {
+                    valores.push(input.value);
+                });
+
+                localStorage.setItem('tabelaExtr', JSON.stringify(valores));
+                document.getElementById("formulario").submit();
+            }
+        </script>
+        
+        <br>
+        {% if erroMetodo is not none %}
+            <erro>{{ erroMetodo }}</erro>
+        {% endif %}
+        {% if erroValores is not none %}
+            <erro>{{ erroValores }}</erro>
+        {% endif %}
+        {% if resul_x is not none %}
+        <h3>Resultado:</h3>
+        <p>f({{ x_valor }}): {{ resul_x }}</p>
+        <p>f(x): {{ funcao }}</p>
+
+        <h4>Dados:</h4>
+        
+        <table class="pontos">
+            <thead class="pontos">
+                <th class="pontos">#</th>
+                {% for i in range(num_pontos) %}
+                <th class="pontos">{{ i }}</th>
+                {% endfor %}
+                <th>Soma</th>
+            </thead>
+            <tbody class="pontos">
+                {% for linha in tabelaNova %}
+                <tr class="pontos">
+                    <th class="pontos">{{ nomes[loop.index] }}</th>
+                    {% for elem in linha %}
+                    <td class="pontos">{{ elem }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4>Sistema:</h4>
+        {% for linha in matriz %}
+        <p>({{ linha[0] }}) * a + ({{ linha[1] }}) * b + ({{ linha[2] }}) * c = {{ linha[3] }}</p>
+        {% endfor %}
+        
+        <h4>Triângulo Superior:</h4>
+        {% for linha in trianguloSuperior %}
+        <p>({{ linha[0] }}) * a + ({{ linha[1] }}) * b + ({{ linha[2] }}) * c = {{ linha[3] }}</p>
+        {% endfor %}
+        {% endif %}
+    </div>
+</body>
+</html>

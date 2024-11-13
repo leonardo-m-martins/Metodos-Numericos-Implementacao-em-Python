@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parâmetros Gauss-Seidel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="button">Voltar</a>
+        <h1>Método de Gauss-Seidel</h1>
+        
+        <form id="formulario" method="POST">
+            <label class="ordem" for="ordem">Selecione a ordem:</label>
+            <select class="ordem" id="ordem" name="ordem" onchange="gerarTabela()">
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+            </select>
+    
+            <div id="tabelaGS-container">
+                <!-- Tabela será gerada aqui -->
+            </div>
+
+            <div id="tabelaGS-container-x">
+                <!-- Tabela será gerada aqui -->
+            </div>
+
+            <informacoes>
+                <div class="texto" id="caixaTexto">
+                <p>
+                    Os valores devem ser números reais.
+                </p>
+                <pre class="texto-escondido">
+Operadores: 
++ (soma); 
+- (subtração); 
+* (multiplicação); 
+/ (divisão); 
+** (potenciação); 
+                </pre>
+            </div>
+            <span class="expandir-btn" id="botaoExpandir">Mais detalhes</span>
+        
+            <script>
+                document.getElementById("botaoExpandir").onclick = function () {
+                    const caixaTexto = document.getElementById("caixaTexto");
+                    const botao = document.getElementById("botaoExpandir");
+                    
+                    if (caixaTexto.classList.toggle("expanso")) {
+                        botao.textContent = "Menos detalhes";
+                    } else {
+                        botao.textContent = "Mais detalhes";
+                    }
+                };
+            </script>
+            </informacoes>
+
+            <label for="TOL">Tolerância (TOL):</label>
+            <input type="text" id="TOL" name="TOL" value="{{ request.form['TOL'] if request.method == 'POST' and request.form['TOL'] else '' }}" placeholder="Valor padrão: 0.0001">
+            {% if avaliarFloatTOL is not none %}
+                <erro>{{ avaliarFloatTOL }}</erro>
+            {% endif %}
+    
+            <button type="submit">Calcular</button>
+        </form>
+    
+        <script>
+            // Função para gerar a tabelaGS com base na ordem selecionada
+            function gerarTabela() {
+                var ordem = document.getElementById('ordem').value; // Pega o valor da ordem
+                var tabelaGS = '<table class="gauss" border="1">';
+                var tabelaGSBody = '';
+                var tabelaGSHead = '<thead class="gauss">';
+                var tabelaGSX = '<table class="gauss" border="1">';
+                var tabelaGSBodyX = '<tr><th class="gauss">X<sup>0</sup>:</th>';
+
+    
+                // Gera as linhas da tabelaGS
+                for (var i = 0; i < ordem; i++) {
+                    tabelaGSBody += '<tr>';
+                    tabelaGSBodyX += '<td>X<sub>'+(i+1)+'</sub> = <input class="gauss" type="text" name="tabelaGS-x-' + i + '" value="" placeholder="0"></td>';
+                    for (var j = 0; j <= ordem; j++) {
+                        if (i == 0){
+                            if (j != ordem) {tabelaGSHead += '<th class="gauss">X<sub>' + (j + 1) + '</sub></th>'}
+                            else {tabelaGSHead += '<th class="gauss">=</th>'}
+                        }
+                        if (j != ordem) {
+                            tabelaGSBody += '<td><input class="gauss" type="text" name="tabelaGS-' + i + '-' + j + '" value="">X<sub>' + (j + 1) + '</sub></td>';
+                        } else {
+                            tabelaGSBody += '<td><input class="gauss" type="text" name="tabelaGS-' + i + '-' + j + '" value=""></td>';
+                        }
+                    }
+                    tabelaGSHead += '</thead>';
+                    tabelaGSBody += '</tr>';
+                }
+                tabelaGSX += tabelaGSBodyX+'</table>';
+                tabelaGS += tabelaGSHead+tabelaGSBody+'</table>';
+    
+                // Insere a tabelaGS no container
+                document.getElementById('tabelaGS-container-x').innerHTML = tabelaGSX;
+                document.getElementById('tabelaGS-container').innerHTML = tabelaGS;
+            }
+    
+            // Gera a tabelaGS ao carregar a página com a ordem padrão
+            window.onload = function() {
+                gerarTabela(); // Gera a tabelaGS com a ordem inicial, que é 3 por padrão
+            };
+        </script>
+    
+        <script>
+            // Função para restaurar os valores ao carregar a página (se houver valores salvos no localStorage)
+            window.onload = function() {
+                gerarTabela(); // Gera a tabelaGS com a ordem inicial, que é 3 por padrão
+
+                // Restaurar valores salvos no localStorage para tabelaGS
+                var valoresSalvos = localStorage.getItem('tabelaGS');
+                if (valoresSalvos) {
+                    valoresSalvos = JSON.parse(valoresSalvos);
+                    var tabelaGSInputs = document.querySelectorAll('input[type="text"]');
+                    for (var i = 0; i < tabelaGSInputs.length; i++) {
+                        if (valoresSalvos[i].toString() != 'undefined'){tabelaGSInputs[i].value = valoresSalvos[i];}
+                    }
+                }
+
+                // Restaurar valores salvos no localStorage para tabelaGS-x
+                var valoresSalvosX = localStorage.getItem('tabelaGSX');
+                if (valoresSalvosX) {
+                    valoresSalvosX = JSON.parse(valoresSalvosX);
+                    var tabelaGSInputsX = document.querySelectorAll('input[name^="tabelaGS-x"]');
+                    for (var i = 0; i < tabelaGSInputsX.length; i++) {
+                        if (valoresSalvosX[i].toString() != 'undefined'){tabelaGSInputsX[i].value = valoresSalvosX[i];}
+                    }
+                }
+            }
+
+            // Função para salvar os valores das tabelaGSs no localStorage ao enviar o formulário
+            document.getElementById("formulario").onsubmit = function(event) {
+                event.preventDefault(); // Impede o envio do formulário
+
+                // Salvar os valores da tabelaGS principal
+                var tabelaGS = document.querySelectorAll('input[name^="tabelaGS-"]');
+                var valores = [];
+                tabelaGS.forEach(function(input) {
+                    valores.push(input.value);
+                });
+                localStorage.setItem('tabelaGS', JSON.stringify(valores));
+
+                // Salvar os valores da tabelaGS X
+                var tabelaGSX = document.querySelectorAll('input[name^="tabelaGS-x"]');
+                var valoresX = [];
+                tabelaGSX.forEach(function(input) {
+                    valoresX.push(input.value);
+                });
+                localStorage.setItem('tabelaGSX', JSON.stringify(valoresX));
+
+                document.getElementById("formulario").submit();
+            }
+        </script>
+        
+        <br>
+        {% if erroMetodo is not none %}
+            <erro>{{ erroMetodo }}</erro>
+        {% endif %}
+        {% if erroValores is not none %}
+            <erro>{{ erroValores }}</erro>
+        {% endif %}
+        {% if Xs is not none %}
+        <h3>Resultado:</h3>
+        <p>Erro absoluto: {{ erroAbsoluto }}</p>
+        <p>X<sup>{{ matrizes|length }}</sup>: {% for xn in Xs %}X<sub>{{ loop.index }}</sub> = {{ xn }} | {% endfor %}</p>
+        <h4>Passo a passo:</h4>
+        {% for Xns in matrizes %}
+            <p>X<sup>{{ loop.index }}</sup>: {% for xn in Xns %}X<sub>{{ loop.index }}</sub> = {{ xn }} | {% endfor %}</p>
+        {% endfor %}
+        {% endif %}
+    </div>
+</body>
+</html>
