@@ -7,6 +7,7 @@ from metodos import (ler_funcao,bolzano,metodo_biseccao,
 import webbrowser
 import threading
 import time
+import argparse
 
 app = Flask(__name__)
 
@@ -602,6 +603,12 @@ def open_browser():
 
 if __name__ == "__main__":
     print("Iniciando o servidor Flask. Por favor, aguarde...")
-    print("O navegador será aberto automaticamente assim que o servidor estiver pronto.")
-    threading.Thread(target=open_browser).start()  # Abre o navegador em uma nova thread
-    app.run(host="127.0.0.1", port=5000)  # Porta e host definidos para garantir consistência
+    # print("O navegador será aberto automaticamente assim que o servidor estiver pronto.")
+    # threading.Thread(target=open_browser).start()  # Abre o navegador em uma nova thread
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--host', default='127.0.0.1', help='Host do servidor')
+    parser.add_argument('--port', type=int, default=5000, help='Porta do servidor')
+    args = parser.parse_args()
+
+    app.run(host=args.host, port=args.port)
