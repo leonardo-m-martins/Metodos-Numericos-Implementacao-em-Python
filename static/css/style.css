@@ -15,6 +15,47 @@ body {
     border-radius: 8px;
 }
 
+.info-box {
+    width: 90%;
+    background-color: #e0f0ff;
+    border: 2px solid lightblue;
+    border-radius: 8px;
+    display: flex;
+    padding: 0.5rem 1rem;
+    margin: 0 auto;
+    margin-bottom: 2rem;
+}
+
+.info-box p {
+    font-size: small;
+    color: darkblue;
+}
+
+.info-box i {
+    color: darkblue;
+    margin-left: -0.5rem;
+    margin-right: 0.5rem;
+    font-size: larger;
+}
+
+hr {
+    margin: 1rem 0;
+    color: lightgray;
+}
+
+.footnote {
+    color: lightslategray;
+    text-align: center;
+}
+
+.footnote a {
+    color: lightslategray;
+}
+
+.footnote a:hover {
+    color: slategray;
+}
+
 h1 {
     text-align: center;
     color: #333;

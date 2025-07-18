@@ -5,10 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Métodos Numéricos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <h1>Métodos Numéricos</h1>
+
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i>
+            <p>Esta página reúne os principais métodos numéricos usados para resolver equações e problemas matemáticos. Você encontrará explicações e exemplos de técnicas como busca de raízes, interpolação, extrapolação e integração. Explore os tópicos para entender como esses métodos são aplicados na prática.</p>
+        </div>
+
         <a href="/bolzano" class="button">Teorema de Bolzano</a>
         <a href="/bisseccao" class="button">Método da Bissecção</a>
         <a href="/newton_raphson" class="button">Método Newton-Raphson</a>
@@ -25,6 +32,9 @@
         <a href="/extrapolacao_parabola" class="button">Método de Ajuste de Curvas: Parábola</a>
         <h2>Intergração</h2>
         <a href="/integracao_trapezio_composto" class="button">Integração por Trapézio Composto</a>
+        <hr />
+        <p class="footnote">Projeto desenvolvido com Flask, HTML, CSS e Jinja2 como parte dos estudos de Métodos Numéricos.
+        <br /> Veja o código no <a href="https://github.com/leonardo-m-martins/Metodos-Numericos-Implementacao-em-Python" target="_blank">GitHub</a>.</p>
     </div>
 </body>
 </html>
