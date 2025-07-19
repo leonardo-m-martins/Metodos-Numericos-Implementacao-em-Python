@@ -11,4 +11,4 @@ COPY . .
 EXPOSE 8000
 
 # Comando para rodar Gunicorn com 1 worker e 2 threads
-CMD ["gunicorn", "-w", "1", "--threads", "2", "-b", "0.0.0.0:8000", "app:app"]
+CMD ["gunicorn", "-w", "1", "-b", "0.0.0.0:8000", "app:app"]
